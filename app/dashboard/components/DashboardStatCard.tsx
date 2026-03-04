@@ -17,7 +17,7 @@ export interface StatCardProps {
     subtitle?: string;
 }
 
-export default function StatCard({
+export default function DashboardStatCard({
     title,
     value,
     icon,
