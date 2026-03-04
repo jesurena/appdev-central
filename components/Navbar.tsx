@@ -52,8 +52,6 @@ const Navbar: React.FC = () => {
                 )}
             >
                 <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-
-                    {/* Left: Logo & Brand */}
                     <div className="flex items-center gap-8">
                         <Link href="/" className="flex items-center gap-2 group">
                             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform shadow-lg shadow-primary/20">
@@ -63,8 +61,6 @@ const Navbar: React.FC = () => {
                                 appdev central
                             </span>
                         </Link>
-
-                        {/* Desktop Menu - Modules Dropdown */}
                         <div
                             className="relative hidden md:block"
                             onMouseEnter={() => setIsModulesOpen(true)}
@@ -112,7 +108,6 @@ const Navbar: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Right Side Actions */}
                     <div className="flex items-center gap-4">
                         <div className="hidden md:block">
                             <Link href="/login">
@@ -124,8 +119,6 @@ const Navbar: React.FC = () => {
                                 </Button>
                             </Link>
                         </div>
-
-                        {/* Mobile Menu Button */}
                         <button
                             onClick={() => setIsMenuOpen(true)}
                             className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
