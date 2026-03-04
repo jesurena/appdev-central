@@ -1,6 +1,6 @@
 import "./globals.css";
-
 import Navbar from "@/components/Navbar";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 export default function RootLayout({
   children,
@@ -9,11 +9,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className="antialiased"
-      >
-        <Navbar />
-        <main>{children}</main>
+      <body className="antialiased">
+        <QueryProvider>
+          <Navbar />
+          <main>{children}</main>
+        </QueryProvider>
       </body>
     </html>
   );

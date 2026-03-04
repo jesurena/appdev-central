@@ -3,9 +3,8 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { Form, Input, Button } from 'antd';
-import type { FormProps } from 'antd';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Form, Input, Button, notification } from 'antd';
 
 import dashboardMockup from './assets/image-removebg-preview.png';
 import StackIcon from 'tech-stack-icons';
@@ -16,6 +15,8 @@ type FieldType = {
 };
 
 export default function LoginPage() {
+    const searchParams = useSearchParams();
+    const error = searchParams.get('error');
     const router = useRouter();
 
     useEffect(() => {
@@ -25,12 +26,21 @@ export default function LoginPage() {
         }
     }, [router]);
 
-    const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
-        // You can store an actual user token/data here in the future
-        localStorage.setItem('token', 'true');
-        router.push('/dashboard');
-    };
+    useEffect(() => {
+        if (error === 'unauthorized') {
+            notification.error({
+                message: 'Login Error',
+                description: 'You are not authorized to access this application.',
+                placement: 'topRight',
+            });
+            router.replace('/login');
+        }
+    }, [error, router]);
 
+    const handleGoogleLogin = () => {
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        window.location.href = `${backendUrl}/auth/google/redirect`;
+    };
 
     return (
         <div className="flex min-h-screen bg-white">
@@ -55,7 +65,6 @@ export default function LoginPage() {
                     <Form
                         name="login"
                         layout="vertical"
-                        onFinish={onFinish}
                         autoComplete="off"
                         requiredMark={false}
 
@@ -112,7 +121,10 @@ export default function LoginPage() {
                         </div>
 
                         <div className="mt-6 flex justify-center">
-                            <Button className="flex items-center justify-center w-full gap-3 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-semibold text-gray-700 hover:border-gray-300">
+                            <Button
+                                onClick={handleGoogleLogin}
+                                className="flex items-center justify-center w-full gap-3 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-semibold text-gray-700 hover:border-gray-300"
+                            >
                                 <StackIcon name="google" className="w-5 h-5" />
                                 Continue with Google
                             </Button>
