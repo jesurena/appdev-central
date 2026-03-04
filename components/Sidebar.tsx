@@ -55,7 +55,7 @@ export default function Sidebar() {
         {
             title: 'MODULES',
             items: [
-                { name: 'User Management', href: '/dashboard/users', icon: Users }
+                { name: 'User Management', href: '/users', icon: Users }
             ]
         }
     ];

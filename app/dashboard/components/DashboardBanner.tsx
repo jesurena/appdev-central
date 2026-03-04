@@ -27,7 +27,7 @@ export default function DashboardBanner() {
                     Manage your users, assign roles, and control permissions.
                 </h1>
 
-                <Link href="/dashboard/users" className="block w-max">
+                <Link href="/users" className="block w-max">
                     <button className="bg-white text-black p-1.5 pr-2 rounded-[32px] flex items-center gap-3 transition-all shadow-xl w-max group">
                         <span className="font-semibold text-[15px] pl-5">Manage Users & Permissions</span>
                         <div className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:translate-x-0.5">
