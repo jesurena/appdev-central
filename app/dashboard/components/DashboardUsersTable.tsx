@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Table, Avatar } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { UserOutlined } from '@ant-design/icons';
 import StatusChip from '@/components/Table/StatusChip';
 import { Users } from '@/interface/user';
 import ViewUserDialog from '@/components/Users/ViewUserDialog';
