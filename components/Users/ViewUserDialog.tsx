@@ -64,7 +64,7 @@ export default function ViewUserDialog({ visible, onClose, user }: ViewUserDialo
                 </div>
             </div>
 
-            <Descriptions column={1} bordered size="small">
+            <Descriptions column={1} bordered size="small" styles={{ label: { width: '40%' } }}>
                 <Descriptions.Item label="Account ID">
                     <span className="font-medium text-gray-700">{user.AccountID}</span>
                 </Descriptions.Item>
@@ -83,26 +83,28 @@ export default function ViewUserDialog({ visible, onClose, user }: ViewUserDialo
                     </span>
                 </Descriptions.Item>
                 <Descriptions.Item label="TCD Access">
-                    <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                            <StatusChip status={!!user.AllowTCDAccess} />
-                            <span className="text-xs text-gray-400 font-medium">{user.AllowTCDAccess ? 'AUTHORIZED' : 'RESTRICTED'}</span>
-                        </div>
+                    <div className="flex items-center gap-2">
+                        <StatusChip
+                            status={!!user.AllowTCDAccess}
+                            activeText="AUTHORIZED"
+                            inactiveText="RESTRICTED"
+                        />
                         {user.AllowTCDAccess && user.TCDRole && (
-                            <Tag color="orange" className="rounded-full px-3 text-[10px] font-bold border-none m-0">
+                            <Tag color="orange" className="rounded-full px-3 text-[10px] font-bold border-none m-0 uppercase">
                                 {getRoleLabel(user.TCDRole)}
                             </Tag>
                         )}
                     </div>
                 </Descriptions.Item>
                 <Descriptions.Item label="Procurement Access">
-                    <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                            <StatusChip status={!!user.AllowProcurementAccess} />
-                            <span className="text-xs text-gray-400 font-medium">{user.AllowProcurementAccess ? 'AUTHORIZED' : 'RESTRICTED'}</span>
-                        </div>
+                    <div className="flex items-center gap-2">
+                        <StatusChip
+                            status={!!user.AllowProcurementAccess}
+                            activeText="AUTHORIZED"
+                            inactiveText="RESTRICTED"
+                        />
                         {user.AllowProcurementAccess && user.ProcurementRole && (
-                            <Tag color="purple" className="rounded-full px-3 text-[10px] font-bold border-none m-0">
+                            <Tag color="purple" className="rounded-full px-3 text-[10px] font-bold border-none m-0 uppercase">
                                 {getRoleLabel(user.ProcurementRole)}
                             </Tag>
                         )}

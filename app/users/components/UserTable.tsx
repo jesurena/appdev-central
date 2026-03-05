@@ -12,7 +12,7 @@ import { Users } from '@/interface/user';
 import UserFilterPopover, { FilterValues } from '@/components/Users/UserFilterPopover';
 
 import UserAvatar from '@/components/Avatar/UserAvatar';
-import { useUsersPaginated } from '@/hooks/users/useUsers';
+import { useUsersPaginated, useCreateUser, useUpdateUser, useBulkUpdateStatus } from '@/hooks/users/useUsers';
 
 export default function UserTable() {
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -46,6 +46,11 @@ export default function UserTable() {
     const [isViewModalVisible, setIsViewModalVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
 
+    // Mutations
+    const createUser = useCreateUser();
+    const updateUser = useUpdateUser();
+    const bulkUpdateStatus = useBulkUpdateStatus();
+
     const handleAddUser = () => {
         setIsEditing(false);
         setSelectedUser(null);
@@ -64,15 +69,27 @@ export default function UserTable() {
     };
 
     const handleSaveUser = (values: any) => {
-        // This will eventually be replaced with a useMutation hook
-        console.log('Save user:', values);
-        setIsEditModalVisible(false);
+        if (isEditing && selectedUser) {
+            updateUser.mutate({ id: selectedUser.AccountID, userData: values }, {
+                onSuccess: () => {
+                    setIsEditModalVisible(false);
+                }
+            });
+        } else {
+            createUser.mutate(values, {
+                onSuccess: () => {
+                    setIsEditModalVisible(false);
+                }
+            });
+        }
     };
 
     const handleBulkStatusUpdate = (status: boolean) => {
-        // This will eventually be replaced with a useMutation hook
-        console.log('Bulk status update:', status, selectedRowKeys);
-        setSelectedRowKeys([]);
+        bulkUpdateStatus.mutate({ ids: selectedRowKeys, status }, {
+            onSuccess: () => {
+                setSelectedRowKeys([]);
+            }
+        });
     };
 
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -253,8 +270,7 @@ export default function UserTable() {
                         pageSize: pagination.pageSize,
                         total: data?.meta?.total || 0,
                         showSizeChanger: true,
-                        pageSizeOptions: ['10', '20', '30', '50'],
-                        className: 'p-6 !mb-0 border-t border-gray-100',
+                        pageSizeOptions: ['10', '20', '50'],
                     }}
                     onChange={handleTableChange}
                     className="user-management-table cursor-pointer"
@@ -269,6 +285,7 @@ export default function UserTable() {
                     onSave={handleSaveUser}
                     user={selectedUser}
                     isEditing={isEditing}
+                    confirmLoading={createUser.isPending || updateUser.isPending}
                 />
 
                 <ViewUserDialog

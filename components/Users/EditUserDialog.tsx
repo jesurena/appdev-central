@@ -17,9 +17,10 @@ interface EditUserDialogProps {
     onSave: (values: any) => void;
     user: Users | null;
     isEditing: boolean;
+    confirmLoading?: boolean;
 }
 
-export default function EditUserDialog({ visible, onCancel, onSave, user, isEditing }: EditUserDialogProps) {
+export default function EditUserDialog({ visible, onCancel, onSave, user, isEditing, confirmLoading }: EditUserDialogProps) {
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -27,7 +28,9 @@ export default function EditUserDialog({ visible, onCancel, onSave, user, isEdit
             if (isEditing && user) {
                 form.setFieldsValue({
                     ...user,
-                    ValidTo: user.ValidTo ? dayjs(user.ValidTo, 'MM-DD-YYYY') : null
+                    ValidTo: user.ValidTo ? dayjs(user.ValidTo) : null,
+                    TCDRole: user.TCDRole ? Number(user.TCDRole) : null,
+                    ProcurementRole: user.ProcurementRole ? Number(user.ProcurementRole) : null,
                 });
             } else {
                 form.resetFields();
@@ -61,6 +64,7 @@ export default function EditUserDialog({ visible, onCancel, onSave, user, isEdit
             open={visible}
             onOk={handleOk}
             onCancel={onCancel}
+            confirmLoading={confirmLoading}
             okText={isEditing ? "Update" : "Create"}
             destroyOnHidden
             centered
@@ -94,11 +98,31 @@ export default function EditUserDialog({ visible, onCancel, onSave, user, isEdit
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <Form.Item
+                        label="Account ID"
+                        name="AccountID"
+                    >
+                        <Input placeholder="e.g. 57740" disabled={isEditing} />
+                    </Form.Item>
+
+                    <Form.Item
                         label="Full Name"
                         name="AccountName"
                         rules={[{ required: true, message: 'Please enter the user name' }]}
                     >
                         <Input placeholder="e.g. Florence Shaw" />
+                    </Form.Item>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <Form.Item
+                        label="Email Address"
+                        name="Email"
+                        rules={[
+                            { required: true, message: 'Please enter the email address' },
+                            { type: 'email', message: 'Please enter a valid email' }
+                        ]}
+                    >
+                        <Input placeholder="e.g. florence@untitledui.com" />
                     </Form.Item>
 
                     <Form.Item
@@ -108,17 +132,6 @@ export default function EditUserDialog({ visible, onCancel, onSave, user, isEdit
                         <Input placeholder="e.g. Florence" />
                     </Form.Item>
                 </div>
-
-                <Form.Item
-                    label="Email Address"
-                    name="Email"
-                    rules={[
-                        { required: true, message: 'Please enter the email address' },
-                        { type: 'email', message: 'Please enter a valid email' }
-                    ]}
-                >
-                    <Input placeholder="e.g. florence@untitledui.com" />
-                </Form.Item>
 
                 <div className="grid grid-cols-2 gap-4">
                     <Form.Item
