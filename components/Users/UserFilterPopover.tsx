@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { Popover, Button, Select, Divider } from 'antd';
 import { Filter, RotateCcw } from 'lucide-react';
+import AccountGroupSelect from '@/components/Select/AccountGroupSelect';
+import AccountTypeSelect from '@/components/Select/AccountTypeSelect';
 
 export interface FilterValues {
     accountGroup: string | null;
@@ -53,18 +55,11 @@ export default function UserFilterPopover({ onApply, onReset }: UserFilterPopove
                         Reset
                     </button>
                 </div>
-                <Select
+                <AccountGroupSelect
                     className="w-full"
                     placeholder="Select group"
                     value={filters.accountGroup}
-                    onChange={(val) => setFilters({ ...filters, accountGroup: val })}
-                    options={[
-                        { label: 'Management', value: 'Management' },
-                        { label: 'Operations', value: 'Operations' },
-                        { label: 'Finance', value: 'Finance' },
-                        { label: 'Marketing', value: 'Marketing' },
-                        { label: 'Engineering', value: 'Engineering' },
-                    ]}
+                    onChange={(val) => setFilters({ ...filters, accountGroup: val as string })}
                 />
             </div>
 
@@ -79,16 +74,11 @@ export default function UserFilterPopover({ onApply, onReset }: UserFilterPopove
                         Reset
                     </button>
                 </div>
-                <Select
+                <AccountTypeSelect
                     className="w-full"
                     placeholder="Select type"
                     value={filters.accountType}
-                    onChange={(val) => setFilters({ ...filters, accountType: val })}
-                    options={[
-                        { label: 'Admin', value: 'Admin' },
-                        { label: 'Standard', value: 'Standard' },
-                        { label: 'Editor', value: 'Editor' },
-                    ]}
+                    onChange={(val) => setFilters({ ...filters, accountType: val as string })}
                 />
             </div>
 

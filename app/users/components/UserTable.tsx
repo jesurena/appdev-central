@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Table, Button, Dropdown } from 'antd';
+import { Table, Button, Dropdown, Input } from 'antd';
 import type { MenuProps } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { Search, Plus, RotateCcw, CheckCircle, XCircle, MoreHorizontal, Edit3 } from 'lucide-react';
@@ -29,11 +29,15 @@ export default function UserTable() {
         pageSize: 10,
     });
 
+    const [searchValue, setSearchValue] = useState('');
+    const [appliedSearch, setAppliedSearch] = useState('');
+
     // Fetch users using the hook
     const { data, isLoading } = useUsersPaginated(pagination.current, pagination.pageSize, {
         AccountGroup: activeFilters.accountGroup,
         AccountType: activeFilters.accountType,
         isActive: activeFilters.status,
+        search: appliedSearch,
     });
 
     // Modal states
@@ -173,7 +177,7 @@ export default function UserTable() {
 
     return (
         <div className="relative">
-            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-xl overflow-x-auto">
+            <div className="bg-white p-4 pt-2 rounded-2xl border border-gray-100 shadow-xl overflow-x-auto">
                 <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                         <h2 className="text-lg font-bold text-gray-900">All users</h2>
@@ -181,16 +185,48 @@ export default function UserTable() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <Input
+                            placeholder="Search users..."
+                            prefix={<Search size={18} className="text-gray-400" />}
+                            className="w-full md:w-[280px] rounded-lg h-10 border-gray-200"
+                            value={searchValue}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearchValue(val);
+                                if (val === '') {
+                                    setAppliedSearch('');
+                                    setPagination(prev => ({ ...prev, current: 1 }));
+                                }
+                            }}
+                            onPressEnter={() => {
+                                setAppliedSearch(searchValue);
+                                setPagination(prev => ({ ...prev, current: 1 }));
+                            }}
+                            allowClear
+                        />
                         <Button
                             icon={<RotateCcw size={18} />}
                             className="rounded-lg h-10 flex items-center gap-2 border-gray-200 font-medium text-gray-500 hover:text-primary hover:border-primary"
-                            onClick={() => setActiveFilters({ accountGroup: null, accountType: null, status: null })}
+                            onClick={() => {
+                                setActiveFilters({ accountGroup: null, accountType: null, status: null });
+                                setSearchValue('');
+                                setAppliedSearch('');
+                                setPagination(prev => ({ ...prev, current: 1 }));
+                            }}
                         >
                             Reset
                         </Button>
                         <UserFilterPopover
-                            onApply={(values) => setActiveFilters(values)}
-                            onReset={() => setActiveFilters({ accountGroup: null, accountType: null, status: null })}
+                            onApply={(values) => {
+                                setActiveFilters(values);
+                                setPagination(prev => ({ ...prev, current: 1 }));
+                            }}
+                            onReset={() => {
+                                setActiveFilters({ accountGroup: null, accountType: null, status: null });
+                                setSearchValue('');
+                                setAppliedSearch('');
+                                setPagination(prev => ({ ...prev, current: 1 }));
+                            }}
                         />
                         <Button
                             type="primary"

@@ -16,6 +16,17 @@ interface ViewUserDialogProps {
 export default function ViewUserDialog({ visible, onClose, user }: ViewUserDialogProps) {
     if (!user) return null;
 
+    const getRoleLabel = (role: number | string | null) => {
+        if (!role) return '';
+        const roles: Record<number | string, string> = {
+            1: 'Super Admin',
+            2: 'Admin',
+            3: 'Buyer',
+            4: 'Requestor'
+        };
+        return roles[role] || role.toString();
+    };
+
     return (
         <Modal
             title="User Details"
@@ -24,12 +35,12 @@ export default function ViewUserDialog({ visible, onClose, user }: ViewUserDialo
             footer={null}
             centered
             width={{
-                xs: '80%',
-                sm: '70%',
-                md: '60%',
-                lg: '50%',
-                xl: '40%',
-                xxl: '30%',
+                xs: '90%',
+                sm: '80%',
+                md: '70%',
+                lg: '60%',
+                xl: '50%',
+                xxl: '40%',
             }}
             styles={{ body: { paddingTop: '20px' } }}
         >
@@ -68,10 +79,36 @@ export default function ViewUserDialog({ visible, onClose, user }: ViewUserDialo
                 </Descriptions.Item>
                 <Descriptions.Item label="Valid To">
                     <span className="font-medium text-gray-700">
-                        {user.ValidTo ? new Date(user.ValidTo).toLocaleDateString() : 'N/A'}
+                        {user.ValidTo || 'N/A'}
                     </span>
                 </Descriptions.Item>
-                <Descriptions.Item label="Status">
+                <Descriptions.Item label="TCD Access">
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <StatusChip status={!!user.AllowTCDAccess} />
+                            <span className="text-xs text-gray-400 font-medium">{user.AllowTCDAccess ? 'AUTHORIZED' : 'RESTRICTED'}</span>
+                        </div>
+                        {user.AllowTCDAccess && user.TCDRole && (
+                            <Tag color="orange" className="rounded-full px-3 text-[10px] font-bold border-none m-0">
+                                {getRoleLabel(user.TCDRole)}
+                            </Tag>
+                        )}
+                    </div>
+                </Descriptions.Item>
+                <Descriptions.Item label="Procurement Access">
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <StatusChip status={!!user.AllowProcurementAccess} />
+                            <span className="text-xs text-gray-400 font-medium">{user.AllowProcurementAccess ? 'AUTHORIZED' : 'RESTRICTED'}</span>
+                        </div>
+                        {user.AllowProcurementAccess && user.ProcurementRole && (
+                            <Tag color="purple" className="rounded-full px-3 text-[10px] font-bold border-none m-0">
+                                {getRoleLabel(user.ProcurementRole)}
+                            </Tag>
+                        )}
+                    </div>
+                </Descriptions.Item>
+                <Descriptions.Item label="Account Status">
                     <StatusChip status={user.isActive} />
                 </Descriptions.Item>
             </Descriptions>

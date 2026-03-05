@@ -13,4 +13,8 @@ export interface Users {
     Nickname: string | null;
     isActive: boolean;
     GAvatar: string | null;
+    AllowTCDAccess?: boolean;
+    AllowProcurementAccess?: boolean;
+    TCDRole?: number | string | null;
+    ProcurementRole?: number | string | null;
 }
