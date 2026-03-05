@@ -8,6 +8,7 @@ import { Form, Input, Button, notification } from 'antd';
 
 import dashboardMockup from './assets/image-removebg-preview.png';
 import StackIcon from 'tech-stack-icons';
+import { useAuth } from '@/hooks/useAuth';
 
 type FieldType = {
     email?: string;
@@ -18,13 +19,14 @@ export default function LoginPage() {
     const searchParams = useSearchParams();
     const error = searchParams.get('error');
     const router = useRouter();
+    const { user, isLoading } = useAuth();
 
+    // If user is already authenticated (has valid cookie), redirect to dashboard
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
+        if (!isLoading && user) {
             router.push('/dashboard');
         }
-    }, [router]);
+    }, [user, isLoading, router]);
 
     useEffect(() => {
         if (error === 'unauthorized') {
