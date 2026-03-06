@@ -79,3 +79,35 @@ export const useBulkUpdateStatus = () => {
         },
     });
 };
+
+export const useUser = (id: string | number | null) => {
+    return useQuery<Users>({
+        queryKey: ['users', id],
+        queryFn: async () => {
+            if (!id) throw new Error('User ID is required');
+            const { data } = await api.get(`/profile/${id}`);
+            const user = data.data || data;
+
+            if (user.assignedAccounts && typeof user.assignedAccounts === 'object' && !Array.isArray(user.assignedAccounts)) {
+                user.assignedAccounts = Object.values(user.assignedAccounts);
+            }
+
+            return user;
+        },
+        enabled: !!id,
+    });
+};
+
+export const useToggleUserStatus = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: number | string) => {
+            const { data } = await api.patch(`/profile/${id}/status`);
+            return data;
+        },
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+            queryClient.invalidateQueries({ queryKey: ['users', id.toString()] });
+        },
+    });
+};

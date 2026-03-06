@@ -25,7 +25,7 @@ export interface AuthUser {
 
 async function fetchCurrentUser(): Promise<AuthUser> {
     try {
-        const { data } = await api.get('/user');
+        const { data } = await api.get('/users/me');
         return data.data;
     } catch (err) {
         console.error("fetchCurrentUser error:", err);
@@ -61,7 +61,7 @@ export function useLogout() {
 
     return useMutation({
         mutationFn: async () => {
-            const { data } = await api.post('/logout');
+            const { data } = await api.post('/auth/logout');
             return data;
         },
         onSuccess: () => {

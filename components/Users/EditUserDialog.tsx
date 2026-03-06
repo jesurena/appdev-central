@@ -10,6 +10,7 @@ import AccountTypeSelect from '@/components/Select/AccountTypeSelect';
 dayjs.extend(customParseFormat);
 
 import { Users } from '@/interface/user';
+import { getRoleOptions } from '@/utils/roleUtils';
 
 interface EditUserDialogProps {
     visible: boolean;
@@ -50,13 +51,7 @@ export default function EditUserDialog({ visible, onCancel, onSave, user, isEdit
 
     const allowTCD = Form.useWatch('AllowTCDAccess', form);
     const allowProcurement = Form.useWatch('AllowProcurementAccess', form);
-
-    const moduleRoles = [
-        { label: 'Super Admin', value: 1 },
-        { label: 'Admin', value: 2 },
-        { label: 'Buyer', value: 3 },
-        { label: 'Requestor', value: 4 },
-    ];
+    const moduleRoles = getRoleOptions();
 
     return (
         <Modal

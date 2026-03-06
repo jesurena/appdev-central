@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Users, Settings, MoreVertical, Menu, X, LogOut, Loader2 } from 'lucide-react';
+import { Home, Users, Settings, MoreVertical, Menu, X, LogOut, Loader2, Contact } from 'lucide-react';
 import { Dropdown, Avatar } from 'antd';
 import type { MenuProps } from 'antd';
 import { clsx, type ClassValue } from 'clsx';
@@ -60,7 +60,8 @@ export default function Sidebar() {
         {
             title: 'MODULES',
             items: [
-                { name: 'User Management', href: '/users', icon: Users }
+                { name: 'User Management', href: '/users', icon: Users },
+                { name: 'User Assignments', href: '/user-assignments', icon: Contact }
             ]
         }
     ];

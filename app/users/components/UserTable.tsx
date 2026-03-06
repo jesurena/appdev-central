@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { Table, Button, Dropdown, Input } from 'antd';
 import type { MenuProps } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Search, Plus, RotateCcw, CheckCircle, XCircle, MoreHorizontal, Edit3 } from 'lucide-react';
+import { Search, Plus, RotateCcw, CheckCircle, XCircle, MoreHorizontal, Edit3, User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import StatusChip from '@/components/Table/StatusChip';
 import EditUserDialog from '@/components/Users/EditUserDialog';
 import ViewUserDialog from '@/components/Users/ViewUserDialog';
@@ -15,6 +16,7 @@ import UserAvatar from '@/components/Avatar/UserAvatar';
 import { useUsersPaginated, useCreateUser, useUpdateUser, useBulkUpdateStatus } from '@/hooks/users/useUsers';
 
 export default function UserTable() {
+    const router = useRouter();
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
     // Filter states
@@ -150,6 +152,19 @@ export default function UserTable() {
             width: 50,
             render: (_: any, record: Users) => {
                 const items: MenuProps['items'] = [
+                    {
+                        key: 'view_profile',
+                        label: (
+                            <div className="flex items-center gap-2 text-gray-700 py-1 font-medium">
+                                <User size={16} />
+                                <span>View Profile</span>
+                            </div>
+                        ),
+                        onClick: ({ domEvent }: any) => {
+                            domEvent.stopPropagation();
+                            router.push(`/users/${record.AccountID}`);
+                        }
+                    },
                     {
                         key: 'edit',
                         label: (

@@ -2,7 +2,7 @@ import React from 'react';
 import Sidebar from '@/components/Sidebar';
 import AuthGuard from '@/components/auth/AuthGuard';
 
-export default function UserManagementLayout({
+export default function UserAssignmentsLayout({
     children,
 }: {
     children: React.ReactNode;

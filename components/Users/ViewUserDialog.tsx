@@ -4,6 +4,7 @@ import React from 'react';
 import { Modal, Descriptions, Tag } from 'antd';
 import StatusChip from '@/components/Table/StatusChip';
 import UserAvatar from '@/components/Avatar/UserAvatar';
+import { getRoleLabel } from '@/utils/roleUtils';
 
 import { Users } from '@/interface/user';
 
@@ -16,16 +17,7 @@ interface ViewUserDialogProps {
 export default function ViewUserDialog({ visible, onClose, user }: ViewUserDialogProps) {
     if (!user) return null;
 
-    const getRoleLabel = (role: number | string | null) => {
-        if (!role) return '';
-        const roles: Record<number | string, string> = {
-            1: 'Super Admin',
-            2: 'Admin',
-            3: 'Buyer',
-            4: 'Requestor'
-        };
-        return roles[role] || role.toString();
-    };
+
 
     return (
         <Modal

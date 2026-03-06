@@ -17,4 +17,5 @@ export interface Users {
     AllowProcurementAccess?: boolean;
     TCDRole?: number | string | null;
     ProcurementRole?: number | string | null;
+    assignedAccounts?: any[];
 }
