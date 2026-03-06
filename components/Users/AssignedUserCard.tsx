@@ -95,6 +95,7 @@ export default function AssignedUserCard({ user }: AssignedUserCardProps) {
                         onClose={() => setIsViewOpen(false)}
                         user={user}
                         showProfileButton={true}
+                        from="assignments"
                     />
                 )}
             </AnimatePresence>

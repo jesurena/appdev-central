@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Button, Tag, Skeleton, Card, Divider, Tabs, Empty } from 'antd';
 import { ChevronLeft, XCircle, Users as UsersIcon, LayoutPanelLeft } from 'lucide-react';
 import { useUser, useUpdateUser } from '@/hooks/users/useUsers';
@@ -14,6 +14,9 @@ import AssignedAccountsTab from './components/AssignedAccountsTab';
 export default function UserProfilePage() {
     const { id } = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const from = searchParams.get('from');
+
     const { data: user, isLoading, isError, refetch } = useUser(id as string);
     const updateUser = useUpdateUser();
 
@@ -45,9 +48,11 @@ export default function UserProfilePage() {
                 type="text"
                 icon={<ChevronLeft size={18} />}
                 onClick={() => router.back()}
-                className="!px-1 mb-6 flex items-center gap-1 text-gray-500 font-medium"
+                className="!px-1 mb-6 flex items-center gap-1 text-gray-500 font-medium hover:text-primary transition-colors"
             >
-                Back to User Management
+                {from === 'assignments' ? 'Back to User Assignments' :
+                    from === 'users' ? 'Back to User Management' :
+                        'Go Back'}
             </Button>
 
             <ProfileHeader

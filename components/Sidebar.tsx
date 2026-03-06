@@ -70,7 +70,7 @@ export default function Sidebar() {
         <div className="flex flex-col h-full bg-white">
             {/* Logo */}
             <div className="p-6 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2 group w-max">
+                <Link href="" className="flex items-center gap-2 group w-max">
                     <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
                         <span className="text-white font-bold text-xs">AC</span>
                     </div>

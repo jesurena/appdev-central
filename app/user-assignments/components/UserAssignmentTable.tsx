@@ -1,27 +1,23 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Dropdown, Input } from 'antd';
+import { Dropdown, Table, Button, Input, Tag } from 'antd';
 import type { MenuProps } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Search, Plus, RotateCcw, CheckCircle, XCircle, MoreHorizontal, Edit3, User } from 'lucide-react';
+import { Search, RotateCcw, UserPlus, Users, MoreHorizontal, User, Edit3 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import UserAvatar from '@/components/Avatar/UserAvatar';
 import StatusChip from '@/components/Table/StatusChip';
-import EditUserDialog from '@/components/Users/EditUserDialog';
-import ViewUserDialog from '@/components/Users/ViewUserDialog';
-import { Users } from '@/interface/user';
 import UserFilterPopover, { FilterValues } from '@/components/Users/UserFilterPopover';
 import { useTableUrlSync } from '@/hooks/useTableUrlSync';
+import { useManagers, Manager } from '@/hooks/user-assignments/useUserAssignments';
+import ViewAssignedUsersDialog from '@/components/Users/ViewAssignedUsersDialog';
 
-import UserAvatar from '@/components/Avatar/UserAvatar';
-import { useUsersPaginated, useCreateUser, useUpdateUser, useBulkUpdateStatus } from '@/hooks/users/useUsers';
-
-export default function UserTable() {
+export default function UserAssignmentTable() {
     const router = useRouter();
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const searchParams = useSearchParams();
 
-    // Filter states initialized from URL params if present
+    // Filter states initialized from URL params
     const [activeFilters, setActiveFilters] = useState<FilterValues>(() => {
         const statusVal = searchParams.get('status');
         return {
@@ -42,29 +38,21 @@ export default function UserTable() {
     // Sync state with URL
     useTableUrlSync(activeFilters, appliedSearch, pagination);
 
-    // Fetch users using the hook
-    const { data, isLoading } = useUsersPaginated(pagination.current, pagination.pageSize, {
+    // Fetch managers using the hook with server-side params
+    const { data: managersData, isLoading } = useManagers(pagination.current, pagination.pageSize, {
         AccountGroup: activeFilters.accountGroup,
         AccountType: activeFilters.accountType,
         isActive: activeFilters.status,
         search: appliedSearch,
     });
 
-    // Modal states
-    const [selectedUser, setSelectedUser] = useState<Users | null>(null);
-    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-    const [isViewModalVisible, setIsViewModalVisible] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
+    // Modal state for viewing assignments
+    const [viewDialogOpen, setViewDialogOpen] = useState(false);
+    const [selectedManager, setSelectedManager] = useState<Manager | null>(null);
 
-    // Mutations
-    const createUser = useCreateUser();
-    const updateUser = useUpdateUser();
-    const bulkUpdateStatus = useBulkUpdateStatus();
-
-    const handleAddUser = () => {
-        setIsEditing(false);
-        setSelectedUser(null);
-        setIsEditModalVisible(true);
+    const handleRowClick = (record: Manager) => {
+        setSelectedManager(record);
+        setViewDialogOpen(true);
     };
 
     const handleReset = () => {
@@ -74,64 +62,25 @@ export default function UserTable() {
         setPagination(prev => ({ ...prev, current: 1 }));
     };
 
-    const handleEditUser = (user: Users) => {
-        setIsEditing(true);
-        setSelectedUser(user);
-        setIsEditModalVisible(true);
-    };
-
-    const handleViewUser = (user: Users) => {
-        setSelectedUser(user);
-        setIsViewModalVisible(true);
-    };
-
-    const handleSaveUser = (values: any) => {
-        if (isEditing && selectedUser) {
-            updateUser.mutate({ id: selectedUser.AccountID, userData: values }, {
-                onSuccess: () => {
-                    setIsEditModalVisible(false);
-                }
-            });
-        } else {
-            createUser.mutate(values, {
-                onSuccess: () => {
-                    setIsEditModalVisible(false);
-                }
-            });
-        }
-    };
-
-    const handleBulkStatusUpdate = (status: boolean) => {
-        bulkUpdateStatus.mutate({ ids: selectedRowKeys, status }, {
-            onSuccess: () => {
-                setSelectedRowKeys([]);
-            }
-        });
-    };
-
-    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-        setSelectedRowKeys(newSelectedRowKeys);
-    };
-
-    const columns: ColumnsType<Users> = [
+    const columns: ColumnsType<Manager> = [
         {
             title: 'Account ID',
             dataIndex: 'AccountID',
             key: 'AccountID',
-            sorter: (a: Users, b: Users) => a.AccountID - b.AccountID,
+            sorter: (a: Manager, b: Manager) => a.AccountID - b.AccountID,
             render: (text: number) => <span className="text-gray-500 font-medium">{text}</span>
         },
         {
             title: 'User name',
             dataIndex: 'AccountName',
             key: 'AccountName',
-            sorter: (a: Users, b: Users) => a.AccountName.localeCompare(b.AccountName),
-            render: (text: string, record: Users) => (
+            sorter: (a: Manager, b: Manager) => a.AccountName.localeCompare(b.AccountName),
+            render: (text: string, record: Manager) => (
                 <div className="flex items-center gap-3">
                     <UserAvatar
                         src={record.GAvatar}
                         name={record.AccountName}
-                        domainAccount={record.DomainAccount}
+                        domainAccount={null}
                         size={40}
                         className="flex-shrink-0"
                     />
@@ -146,7 +95,7 @@ export default function UserTable() {
             title: 'Account Group',
             dataIndex: 'AccountGroup',
             key: 'AccountGroup',
-            sorter: (a: Users, b: Users) => a.AccountGroup.localeCompare(b.AccountGroup),
+            sorter: (a: Manager, b: Manager) => a.AccountGroup.localeCompare(b.AccountGroup),
             render: (text: string) => <span className="text-gray-600 font-medium">{text}</span>
         },
         {
@@ -162,10 +111,22 @@ export default function UserTable() {
             render: (status: boolean) => <StatusChip status={status} />
         },
         {
+            title: 'Assigned',
+            dataIndex: 'Assigned',
+            key: 'Assigned',
+            align: 'center',
+            sorter: (a: Manager, b: Manager) => a.Assigned - b.Assigned,
+            render: (count: number) => (
+                <Tag className="rounded-full px-3 bg-gray-100 border-none font-bold text-gray-600 m-0">
+                    {count}
+                </Tag>
+            )
+        },
+        {
             title: '',
             key: 'action',
             width: 50,
-            render: (_: any, record: Users) => {
+            render: (_: any, record: Manager) => {
                 const items: MenuProps['items'] = [
                     {
                         key: 'view_profile',
@@ -177,7 +138,7 @@ export default function UserTable() {
                         ),
                         onClick: ({ domEvent }: any) => {
                             domEvent.stopPropagation();
-                            router.push(`/users/${record.AccountID}?from=users`);
+                            router.push(`/users/${record.AccountID}?from=assignments`);
                         }
                     },
                     {
@@ -185,12 +146,12 @@ export default function UserTable() {
                         label: (
                             <div className="flex items-center gap-2 text-primary py-1 font-medium">
                                 <Edit3 size={16} />
-                                <span>Edit User</span>
+                                <span>Edit Assignments</span>
                             </div>
                         ),
                         onClick: ({ domEvent }: any) => {
                             domEvent.stopPropagation();
-                            handleEditUser(record);
+                            // Implementation for editing assignments would go here
                         }
                     }
                 ];
@@ -210,32 +171,22 @@ export default function UserTable() {
         },
     ];
 
-    const handleTableChange = (newPagination: any) => {
-        setPagination({
-            current: newPagination.current,
-            pageSize: newPagination.pageSize,
-        });
-    };
-
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: onSelectChange,
-    };
-
     return (
         <div className="relative">
             <div className="bg-white p-4 pt-2 rounded-2xl border border-gray-100 shadow-xl overflow-x-auto">
                 <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-lg font-bold text-gray-900">All users</h2>
-                        <span className="bg-accent-1 text-white px-2 py-0.5 rounded-full text-xs font-bold">{data?.meta?.total || 0}</span>
+                        <h2 className="text-lg font-bold text-gray-900">All Users with Assignments</h2>
+                        <span className="bg-accent-1 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                            {managersData?.meta?.total || 0}
+                        </span>
                     </div>
 
                     <div className="flex items-center gap-3">
                         <Input
-                            placeholder="Search users..."
+                            placeholder="Search by name, email, or group..."
                             prefix={<Search size={18} className="text-gray-400" />}
-                            className="w-full md:w-[280px] rounded-lg h-10 border-gray-200"
+                            className="w-full md:w-[320px] rounded-lg h-10 border-gray-200"
                             value={searchValue}
                             onChange={(e) => {
                                 const val = e.target.value;
@@ -268,11 +219,10 @@ export default function UserTable() {
                         />
                         <Button
                             type="primary"
-                            icon={<Plus size={18} />}
+                            icon={<UserPlus size={18} />}
                             className="rounded-lg h-10 flex items-center gap-2 border-none font-medium shadow-none"
-                            onClick={handleAddUser}
                         >
-                            Add user
+                            Assign User
                         </Button>
                     </div>
                 </div>
@@ -280,78 +230,33 @@ export default function UserTable() {
                 <Table
                     rowKey="AccountID"
                     loading={isLoading}
-                    rowSelection={{
-                        type: 'checkbox',
-                        ...rowSelection,
-                    }}
                     columns={columns}
-                    dataSource={data?.data || []}
+                    dataSource={managersData?.data || []}
+                    onRow={(record) => ({
+                        onClick: () => handleRowClick(record),
+                        className: 'cursor-pointer hover:bg-gray-50/50 transition-colors'
+                    })}
                     pagination={{
-                        current: pagination.current,
-                        pageSize: pagination.pageSize,
-                        total: data?.meta?.total || 0,
+                        ...pagination,
+                        total: managersData?.meta?.total || 0,
                         showSizeChanger: true,
                         pageSizeOptions: ['10', '20', '50', '1000'],
+                        onChange: (page, pageSize) => {
+                            setPagination({ current: page, pageSize });
+                        }
                     }}
-                    onChange={handleTableChange}
-                    className="user-management-table cursor-pointer"
-                    onRow={(record: Users) => ({
-                        onClick: () => handleViewUser(record),
-                    })}
+                    className="user-management-table"
                 />
 
-                <EditUserDialog
-                    visible={isEditModalVisible}
-                    onCancel={() => setIsEditModalVisible(false)}
-                    onSave={handleSaveUser}
-                    user={selectedUser}
-                    isEditing={isEditing}
-                    confirmLoading={createUser.isPending || updateUser.isPending}
-                />
-
-                <ViewUserDialog
-                    visible={isViewModalVisible}
-                    onClose={() => setIsViewModalVisible(false)}
-                    user={selectedUser}
-                    from="users"
+                <ViewAssignedUsersDialog
+                    open={viewDialogOpen}
+                    manager={selectedManager}
+                    onClose={() => {
+                        setViewDialogOpen(false);
+                        setSelectedManager(null);
+                    }}
                 />
             </div>
-
-            {selectedRowKeys.length > 0 && (
-                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="bg-white/90 backdrop-blur-md border border-gray-200 shadow-2xl rounded-xl px-6 py-3 flex items-center gap-4">
-                        <div className="flex items-center gap-2 pr-4 border-r border-gray-200">
-                            <span className="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
-                                {selectedRowKeys.length}
-                            </span>
-                            <span className="text-gray-600 font-medium text-sm whitespace-nowrap">selected</span>
-                        </div>
-
-                        <button
-                            onClick={() => handleBulkStatusUpdate(true)}
-                            className="flex items-center gap-2 px-4 py-1.5 rounded-full hover:bg-green-50 text-green-600 transition-colors font-semibold text-sm group"
-                        >
-                            <CheckCircle size={18} className="transition-transform group-hover:scale-110" />
-                            <span>Bulk Active</span>
-                        </button>
-
-                        <button
-                            onClick={() => handleBulkStatusUpdate(false)}
-                            className="flex items-center gap-2 px-4 py-1.5 rounded-full hover:bg-red-50 text-red-600 transition-colors font-semibold text-sm group"
-                        >
-                            <XCircle size={18} className="transition-transform group-hover:scale-110" />
-                            <span>Bulk Inactive</span>
-                        </button>
-
-                        <button
-                            onClick={() => setSelectedRowKeys([])}
-                            className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
-                        >
-                            <XCircle size={18} />
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

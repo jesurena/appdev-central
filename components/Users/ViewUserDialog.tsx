@@ -16,9 +16,10 @@ interface ViewUserDialogProps {
     onClose: () => void;
     user: Users | null;
     showProfileButton?: boolean;
+    from?: 'users' | 'assignments';
 }
 
-export default function ViewUserDialog({ visible, onClose, user, showProfileButton = false }: ViewUserDialogProps) {
+export default function ViewUserDialog({ visible, onClose, user, showProfileButton = false, from }: ViewUserDialogProps) {
     const router = useRouter();
     const [copiedField, setCopiedField] = React.useState<string | null>(null);
 
@@ -32,7 +33,8 @@ export default function ViewUserDialog({ visible, onClose, user, showProfileButt
 
     const handleGoToProfile = () => {
         onClose();
-        router.push(`/users/${user.AccountID}`);
+        const url = from ? `/users/${user.AccountID}?from=${from}` : `/users/${user.AccountID}`;
+        router.push(url);
     };
 
     return (
