@@ -1,6 +1,4 @@
-'use client';
-
-import React from 'react';
+import React, { Suspense } from 'react';
 import UserTable from './components/UserTable';
 
 export default function UserManagementPage() {
@@ -13,7 +11,9 @@ export default function UserManagementPage() {
                 </p>
             </div>
 
-            <UserTable />
+            <Suspense fallback={<div>Loading user data...</div>}>
+                <UserTable />
+            </Suspense>
         </div>
     );
 }

@@ -89,7 +89,7 @@ export default function UserProfilePage() {
                         label: (
                             <span className="flex items-center gap-2 font-bold px-2 py-1">
                                 <UsersIcon size={18} />
-                                Assigned Accounts
+                                Assigned Users
                                 {user?.assignedAccounts && (
                                     <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[10px] ml-1">
                                         {user.assignedAccounts.length}

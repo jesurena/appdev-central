@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Popover, Button, Select, Divider } from 'antd';
 import { Filter, RotateCcw } from 'lucide-react';
 import AccountGroupSelect from '@/components/Select/AccountGroupSelect';
@@ -13,16 +13,18 @@ export interface FilterValues {
 }
 
 export interface UserFilterPopoverProps {
+    currentFilters: FilterValues;
     onApply: (filters: FilterValues) => void;
     onReset: () => void;
 }
 
-export default function UserFilterPopover({ onApply, onReset }: UserFilterPopoverProps) {
-    const [filters, setFilters] = useState<FilterValues>({
-        accountGroup: null,
-        accountType: null,
-        status: null,
-    });
+export default function UserFilterPopover({ currentFilters, onApply, onReset }: UserFilterPopoverProps) {
+    const [filters, setFilters] = useState<FilterValues>(currentFilters);
+
+    // Sync internal state with props when currentFilters change
+    useEffect(() => {
+        setFilters(currentFilters);
+    }, [currentFilters]);
 
     const handleResetAll = () => {
         const resetValues: FilterValues = {

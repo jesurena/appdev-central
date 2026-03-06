@@ -1,10 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Modal, Descriptions, Tag } from 'antd';
+import { Modal, Descriptions, Tag, Button, Tooltip } from 'antd';
+import { ExternalLink, Copy, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import StatusChip from '@/components/Table/StatusChip';
 import UserAvatar from '@/components/Avatar/UserAvatar';
 import { getRoleLabel } from '@/utils/roleUtils';
+import { copyToClipboard } from '@/utils/clipboard';
 
 import { Users } from '@/interface/user';
 
@@ -12,19 +15,45 @@ interface ViewUserDialogProps {
     visible: boolean;
     onClose: () => void;
     user: Users | null;
+    showProfileButton?: boolean;
 }
 
-export default function ViewUserDialog({ visible, onClose, user }: ViewUserDialogProps) {
+export default function ViewUserDialog({ visible, onClose, user, showProfileButton = false }: ViewUserDialogProps) {
+    const router = useRouter();
+    const [copiedField, setCopiedField] = React.useState<string | null>(null);
+
     if (!user) return null;
 
+    const handleCopy = (text: string, field: string) => {
+        copyToClipboard(text, field);
+        setCopiedField(field);
+        setTimeout(() => setCopiedField(null), 2000);
+    };
 
+    const handleGoToProfile = () => {
+        onClose();
+        router.push(`/users/${user.AccountID}`);
+    };
 
     return (
         <Modal
             title="User Details"
             open={visible}
             onCancel={onClose}
-            footer={null}
+            footer={
+                showProfileButton ? (
+                    <div className="flex justify-end pt-2">
+                        <Button
+                            type="primary"
+                            icon={<ExternalLink size={14} />}
+                            onClick={handleGoToProfile}
+                            className="rounded-xl font-bold bg-primary hover:bg-primary/90 flex items-center gap-2"
+                        >
+                            Go to User Profile
+                        </Button>
+                    </div>
+                ) : null
+            }
             centered
             width={{
                 xs: '90%',
@@ -45,20 +74,39 @@ export default function ViewUserDialog({ visible, onClose, user }: ViewUserDialo
                     className="shadow-sm border-2 border-white"
                 />
                 <h2 className="text-xl mt-2 font-bold text-gray-900">{user.AccountName}</h2>
-                <div className="flex items-center gap-2 text-gray-500">
-                    <span>{user.Email}</span>
+                <div className="flex flex-col items-center text-gray-500">
+                    <div className="flex items-center gap-2 group">
+                        <span className="text-sm">{user.Email}</span>
+                        <Tooltip title={copiedField === 'Header Email' ? 'Copied!' : 'Copy Email'}>
+                            <button
+                                onClick={() => handleCopy(user.Email, 'Header Email')}
+                                className="p-1 hover:bg-gray-100 rounded-md transition-colors text-gray-400 hover:text-primary"
+                            >
+                                {copiedField === 'Header Email' ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                            </button>
+                        </Tooltip>
+                    </div>
                     {user.DomainAccount && (
-                        <>
-                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                            <span className="font-medium">{user.DomainAccount}</span>
-                        </>
+                        <div className="flex items-center gap-2 mt-0.5">
+                            <span className="font-medium text-xs opacity-60 uppercase tracking-wider">{user.DomainAccount}</span>
+                        </div>
                     )}
                 </div>
             </div>
 
             <Descriptions column={1} bordered size="small" styles={{ label: { width: '40%' } }}>
                 <Descriptions.Item label="Account ID">
-                    <span className="font-medium text-gray-700">{user.AccountID}</span>
+                    <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium text-gray-900">{user.AccountID}</span>
+                        <Tooltip title={copiedField === 'Account ID' ? 'Copied!' : 'Copy ID'}>
+                            <button
+                                onClick={() => handleCopy(String(user.AccountID), 'Account ID')}
+                                className="p-1 hover:bg-gray-100 rounded-md transition-colors text-gray-400 hover:text-primary"
+                            >
+                                {copiedField === 'Account ID' ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                            </button>
+                        </Tooltip>
+                    </div>
                 </Descriptions.Item>
                 <Descriptions.Item label="Nickname">
                     <span className="font-medium text-gray-700">{user.Nickname || 'N/A'}</span>

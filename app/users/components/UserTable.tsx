@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Button, Dropdown, Input } from 'antd';
 import type { MenuProps } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { Search, Plus, RotateCcw, CheckCircle, XCircle, MoreHorizontal, Edit3, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import StatusChip from '@/components/Table/StatusChip';
 import EditUserDialog from '@/components/Users/EditUserDialog';
 import ViewUserDialog from '@/components/Users/ViewUserDialog';
@@ -18,21 +18,43 @@ import { useUsersPaginated, useCreateUser, useUpdateUser, useBulkUpdateStatus } 
 export default function UserTable() {
     const router = useRouter();
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
 
-    // Filter states
-    const [activeFilters, setActiveFilters] = useState<FilterValues>({
-        accountGroup: null,
-        accountType: null,
-        status: null,
+    // Filter states initialized from URL params if present
+    const [activeFilters, setActiveFilters] = useState<FilterValues>(() => {
+        const statusVal = searchParams.get('status');
+        return {
+            accountGroup: searchParams.get('group'),
+            accountType: searchParams.get('type'),
+            status: statusVal === 'true' ? true : statusVal === 'false' ? false : null,
+        };
     });
 
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 10,
-    });
+    const [pagination, setPagination] = useState(() => ({
+        current: Number(searchParams.get('page')) || 1,
+        pageSize: Number(searchParams.get('pageSize')) || 10,
+    }));
 
-    const [searchValue, setSearchValue] = useState('');
-    const [appliedSearch, setAppliedSearch] = useState('');
+    const [searchValue, setSearchValue] = useState(searchParams.get('search') || '');
+    const [appliedSearch, setAppliedSearch] = useState(searchParams.get('search') || '');
+
+    // Update URL when filters, search or pagination change
+    useEffect(() => {
+        const params = new URLSearchParams();
+        if (activeFilters.accountGroup) params.set('group', activeFilters.accountGroup);
+        if (activeFilters.accountType) params.set('type', activeFilters.accountType);
+        if (activeFilters.status !== null) params.set('status', String(activeFilters.status));
+        if (appliedSearch) params.set('search', appliedSearch);
+        if (pagination.current > 1) params.set('page', String(pagination.current));
+        if (pagination.pageSize !== 10) params.set('pageSize', String(pagination.pageSize));
+
+        const query = params.toString();
+        const url = `${pathname}${query ? `?${query}` : ''}`;
+
+        // Use replace to avoid polluting history with every filter change
+        router.replace(url, { scroll: false });
+    }, [activeFilters, appliedSearch, pagination, pathname, router]);
 
     // Fetch users using the hook
     const { data, isLoading } = useUsersPaginated(pagination.current, pagination.pageSize, {
@@ -57,6 +79,13 @@ export default function UserTable() {
         setIsEditing(false);
         setSelectedUser(null);
         setIsEditModalVisible(true);
+    };
+
+    const handleReset = () => {
+        setActiveFilters({ accountGroup: null, accountType: null, status: null });
+        setSearchValue('');
+        setAppliedSearch('');
+        setPagination(prev => ({ ...prev, current: 1 }));
     };
 
     const handleEditUser = (user: Users) => {
@@ -239,26 +268,17 @@ export default function UserTable() {
                         <Button
                             icon={<RotateCcw size={18} />}
                             className="rounded-lg h-10 flex items-center gap-2 border-gray-200 font-medium text-gray-500 hover:text-primary hover:border-primary"
-                            onClick={() => {
-                                setActiveFilters({ accountGroup: null, accountType: null, status: null });
-                                setSearchValue('');
-                                setAppliedSearch('');
-                                setPagination(prev => ({ ...prev, current: 1 }));
-                            }}
+                            onClick={handleReset}
                         >
                             Reset
                         </Button>
                         <UserFilterPopover
+                            currentFilters={activeFilters}
                             onApply={(values) => {
                                 setActiveFilters(values);
                                 setPagination(prev => ({ ...prev, current: 1 }));
                             }}
-                            onReset={() => {
-                                setActiveFilters({ accountGroup: null, accountType: null, status: null });
-                                setSearchValue('');
-                                setAppliedSearch('');
-                                setPagination(prev => ({ ...prev, current: 1 }));
-                            }}
+                            onReset={handleReset}
                         />
                         <Button
                             type="primary"
