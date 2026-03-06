@@ -20,7 +20,7 @@ export default function LoginPage() {
         if (user && !isLoading) {
             router.push('/dashboard');
         }
-    }, [user, isLoading, router]);
+    }, [user, isLoading, error, router]);
 
     useEffect(() => {
         if (error === 'unauthorized') {
@@ -36,6 +36,15 @@ export default function LoginPage() {
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         window.location.href = `${backendUrl}/auth/google/redirect`;
     };
+
+    if (isLoading && !error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 flex-col gap-4">
+                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-gray-500 font-medium">Checking session...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen bg-white">

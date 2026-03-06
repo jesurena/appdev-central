@@ -24,8 +24,13 @@ export interface AuthUser {
 }
 
 async function fetchCurrentUser(): Promise<AuthUser> {
-    const { data } = await api.get('/user');
-    return data.data;
+    try {
+        const { data } = await api.get('/user');
+        return data.data;
+    } catch (err) {
+        console.error("fetchCurrentUser error:", err);
+        throw err;
+    }
 }
 
 export function useAuth() {
@@ -35,7 +40,7 @@ export function useAuth() {
     const query = useQuery<AuthUser>({
         queryKey: ['auth', 'me'],
         queryFn: fetchCurrentUser,
-        enabled: !!pathname && !isLoginPage,
+        enabled: !!pathname,
         retry: false,
         staleTime: 5 * 60 * 1000, // 5 minutes
         refetchOnWindowFocus: false,
@@ -60,7 +65,8 @@ export function useLogout() {
             return data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['auth'] });
+            queryClient.removeQueries({ queryKey: ['auth'] });
+            queryClient.clear();
             router.push('/login');
         },
     });

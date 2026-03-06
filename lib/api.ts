@@ -34,7 +34,7 @@ api.interceptors.response.use(
             const isProtectedRoute = protectedRoutes.some(route => currentPath.startsWith(route));
 
             if (isProtectedRoute && currentPath !== '/login') {
-                window.location.href = '/login';
+                window.location.href = '/login?clear_session=1';
             }
         } else {
             notification.error({
