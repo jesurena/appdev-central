@@ -9,6 +9,7 @@ import type { MenuProps } from 'antd';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import SettingsModal from './Settings/SettingsModal';
+import UserAvatar from './Avatar/UserAvatar';
 import { useAuth, useLogout } from '@/hooks/login/useAuth';
 
 function cn(...inputs: ClassValue[]) {
@@ -126,13 +127,13 @@ export default function Sidebar() {
                                     <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
                                 </div>
                             ) : (
-                                <Avatar
+                                <UserAvatar
                                     src={user?.GAvatar}
+                                    name={user?.AccountName}
+                                    domainAccount={user?.DomainAccount}
                                     size={36}
-                                    className="bg-accent-1 text-white font-bold shadow-sm group-hover:scale-105 transition-transform shrink-0"
-                                >
-                                    {user?.AccountName?.charAt(0) || 'U'}
-                                </Avatar>
+                                    className="shadow-sm group-hover:scale-105 transition-transform shrink-0"
+                                />
                             )}
                             <div className="flex flex-col text-left overflow-hidden">
                                 <span className="text-[14px] font-semibold text-gray-900 leading-none mb-1 truncate">

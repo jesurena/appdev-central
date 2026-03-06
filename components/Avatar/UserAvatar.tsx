@@ -18,7 +18,13 @@ const colors = [
 
 export default function UserAvatar({ src, domainAccount, name, size = 40, className }: UserAvatarProps) {
     if (src) {
-        return <Avatar src={src} size={size} className={className} />;
+        return (
+            <Avatar
+                src={<img src={src} alt={name || 'Avatar'} referrerPolicy="no-referrer" />}
+                size={size}
+                className={className}
+            />
+        );
     }
 
     const identifier = domainAccount || name || '?';
