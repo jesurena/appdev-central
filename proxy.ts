@@ -3,8 +3,7 @@ import type { NextRequest } from 'next/server';
 
 export default function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    console.log(`[PROXY MW] Running for: ${pathname} | Has Session: ${request.cookies.has('laravel_session')} | XSRF: ${request.cookies.has('XSRF-TOKEN')}`);
-
+    
     // Define protected and public routes
     const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/users');
     const isLoginPage = pathname === '/login';
