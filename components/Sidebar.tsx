@@ -53,10 +53,10 @@ export default function Sidebar() {
                 { name: 'Overview', href: '/dashboard', icon: Home }
             ]
         },
-        {
-            title: 'QUICK ACCESS',
-            items: []
-        },
+        // {
+        //     title: 'QUICK ACCESS',
+        //     items: []
+        // },
         {
             title: 'MODULES',
             items: [

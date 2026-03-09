@@ -17,6 +17,7 @@ interface UserSelectionModalProps {
     selectionMode: 'single' | 'multiple';
     title: string;
     initialSelectedKeys: React.Key[];
+    initialSelectedRows?: Users[];
     excludeKeys?: React.Key[];
 }
 
@@ -27,10 +28,16 @@ export default function UserSelectionModal({
     selectionMode,
     title,
     initialSelectedKeys,
+    initialSelectedRows = [],
     excludeKeys = []
 }: UserSelectionModalProps) {
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>(initialSelectedKeys);
-    const [selectedRows, setSelectedRows] = useState<Users[]>([]);
+    const [selectedRowsMap, setSelectedRowsMap] = useState<Map<React.Key, Users>>(() => {
+        const map = new Map();
+        initialSelectedRows.forEach(user => map.set(user.AccountID, user));
+        return map;
+    });
+
     const [searchValue, setSearchValue] = useState('');
     const [appliedSearch, setAppliedSearch] = useState('');
     const [activeFilters, setActiveFilters] = useState<FilterValues>({
@@ -47,7 +54,6 @@ export default function UserSelectionModal({
         isActive: activeFilters.status,
     });
 
-    // Client-side filter to exclude specific users (like the manager)
     const filteredData = React.useMemo(() => {
         if (!data?.data) return [];
         return data.data.filter(u => !excludeKeys.includes(u.AccountID));
@@ -58,7 +64,9 @@ export default function UserSelectionModal({
     useEffect(() => {
         if (open) {
             setSelectedRowKeys(initialSelectedKeys);
-            // Reset search/pagination/filters when opening
+            const newMap = new Map();
+            initialSelectedRows.forEach(user => newMap.set(user.AccountID, user));
+            setSelectedRowsMap(newMap);
             setSearchValue('');
             setAppliedSearch('');
             setActiveFilters({
@@ -68,7 +76,7 @@ export default function UserSelectionModal({
             });
             setPagination({ current: 1, pageSize: 10 });
         }
-    }, [open, initialSelectedKeys]);
+    }, [open]);
 
     const columns: ColumnsType<Users> = [
         {
@@ -118,7 +126,10 @@ export default function UserSelectionModal({
     ];
 
     const handleOk = () => {
-        onConfirm(selectedRows);
+        const finalSelectedRows = selectedRowKeys
+            .map(key => selectedRowsMap.get(key))
+            .filter((user): user is Users => !!user);
+        onConfirm(finalSelectedRows);
     };
 
     const handleReset = () => {
@@ -137,7 +148,15 @@ export default function UserSelectionModal({
         selectedRowKeys,
         onChange: (keys: React.Key[], rows: Users[]) => {
             setSelectedRowKeys(keys);
-            setSelectedRows(rows);
+            setSelectedRowsMap(prev => {
+                const newMap = new Map(prev);
+                rows.forEach(row => {
+                    if (keys.includes(row.AccountID)) {
+                        newMap.set(row.AccountID, row);
+                    }
+                });
+                return newMap;
+            });
         },
     };
 
@@ -154,10 +173,9 @@ export default function UserSelectionModal({
             destroyOnHidden
             styles={{
                 body: {
-                    maxHeight: '65vh',
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-                    paddingRight: '8px' // Space for scrollbar
+                    overflowX: 'auto',
+                    overflowY: 'hidden',
+                    paddingRight: '8px'
                 }
             }}
         >
@@ -222,15 +240,14 @@ export default function UserSelectionModal({
                     onClick: () => {
                         if (selectionMode === 'single') {
                             setSelectedRowKeys([record.AccountID]);
-                            setSelectedRows([record]);
+                            setSelectedRowsMap(prev => new Map(prev).set(record.AccountID, record));
                         } else {
                             const isSelected = selectedRowKeys.includes(record.AccountID);
                             if (isSelected) {
                                 setSelectedRowKeys(selectedRowKeys.filter(k => k !== record.AccountID));
-                                setSelectedRows(selectedRows.filter(r => r.AccountID !== record.AccountID));
                             } else {
                                 setSelectedRowKeys([...selectedRowKeys, record.AccountID]);
-                                setSelectedRows([...selectedRows, record]);
+                                setSelectedRowsMap(prev => new Map(prev).set(record.AccountID, record));
                             }
                         }
                     },

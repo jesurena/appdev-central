@@ -23,8 +23,15 @@ export default function UserFilterPopover({ currentFilters, onApply, onReset }: 
 
     // Sync internal state with props when currentFilters change
     useEffect(() => {
-        setFilters(currentFilters);
-    }, [currentFilters]);
+        // Value-based check to prevent infinite loops if currentFilters is a new object but has same values
+        if (
+            filters.accountGroup !== currentFilters.accountGroup ||
+            filters.accountType !== currentFilters.accountType ||
+            filters.status !== currentFilters.status
+        ) {
+            setFilters(currentFilters);
+        }
+    }, [currentFilters, filters]);
 
     const handleResetAll = () => {
         const resetValues: FilterValues = {

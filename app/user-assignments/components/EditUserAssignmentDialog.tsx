@@ -26,20 +26,12 @@ export default function EditUserAssignmentDialog({
 }: EditUserAssignmentDialogProps) {
     const [form] = Form.useForm();
 
-    // Selection Modal States
     const [managerModalOpen, setManagerModalOpen] = useState(false);
     const [personnelModalOpen, setPersonnelModalOpen] = useState(false);
-
-    // Selected Data States (Full Objects for Display)
     const [selectedManager, setSelectedManager] = useState<Users | null>(null);
     const [selectedPersonnel, setSelectedPersonnel] = useState<Users[]>([]);
-    // State to track which manager's personnel we have loaded
     const [loadedManagerId, setLoadedManagerId] = useState<number | null>(null);
-
-    // Fetch current assignments for the SELECTED manager
     const { data: currentAssignments } = useAssignedAccounts(selectedManager?.AccountID || null);
-
-    // Effect to pre-fill when editing an existing manager
     useEffect(() => {
         if (visible && manager && !selectedManager) {
             setSelectedManager({
@@ -56,10 +48,8 @@ export default function EditUserAssignmentDialog({
         }
     }, [visible, manager, selectedManager, form]);
 
-    // Effect to auto-fill personnel when a manager is selected or loaded
     useEffect(() => {
         if (visible && currentAssignments && selectedManager) {
-            // Only auto-fill if we haven't loaded this manager yet
             if (loadedManagerId !== selectedManager.AccountID) {
                 setSelectedPersonnel(currentAssignments);
                 setLoadedManagerId(selectedManager.AccountID);
@@ -70,7 +60,6 @@ export default function EditUserAssignmentDialog({
         }
     }, [currentAssignments, selectedManager, visible, form, loadedManagerId]);
 
-    // Reset when closing
     useEffect(() => {
         if (!visible) {
             form.resetFields();
@@ -104,7 +93,6 @@ export default function EditUserAssignmentDialog({
             const user = users[0];
             setSelectedManager(user);
             form.setFieldsValue({ ManagerID: user.AccountID });
-            // Remove from personnel if they were there
             const updatedPersonnel = selectedPersonnel.filter(p => p.AccountID !== user.AccountID);
             setSelectedPersonnel(updatedPersonnel);
             form.setFieldsValue({ UserIDs: updatedPersonnel.map(p => p.AccountID) });
@@ -136,6 +124,7 @@ export default function EditUserAssignmentDialog({
                 width={650}
                 centered
                 destroyOnHidden
+                forceRender
                 className="premium-modal"
                 styles={{ body: { padding: '24px 32px 32px 32px' } }}
             >
@@ -208,11 +197,12 @@ export default function EditUserAssignmentDialog({
                                 <Button
                                     type="dashed"
                                     block
-                                    className="h-12 rounded-xl flex items-center justify-center gap-2 text-primary border-primary/30 hover:bg-primary/5 transition-all font-bold"
+                                    className="h-12 rounded-xl flex items-center justify-center gap-2 text-primary border-primary/30 hover:bg-primary/5 transition-all font-bold disabled:opacity-50 disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200"
                                     onClick={() => setPersonnelModalOpen(true)}
+                                    disabled={!selectedManager}
                                 >
                                     <UserPlus size={18} />
-                                    Add Personnel
+                                    {selectedManager ? "Add Personnel" : "Select a superior first to add personnel"}
                                 </Button>
 
                                 {selectedPersonnel.length > 0 && (
@@ -240,6 +230,7 @@ export default function EditUserAssignmentDialog({
                 onCancel={() => setManagerModalOpen(false)}
                 onConfirm={handleManagerConfirm}
                 initialSelectedKeys={selectedManager ? [selectedManager.AccountID] : []}
+                excludeKeys={selectedPersonnel.map(p => p.AccountID)}
             />
 
             <UserSelectionModal
@@ -249,6 +240,7 @@ export default function EditUserAssignmentDialog({
                 onCancel={() => setPersonnelModalOpen(false)}
                 onConfirm={handlePersonnelConfirm}
                 initialSelectedKeys={selectedPersonnel.map(p => p.AccountID)}
+                initialSelectedRows={selectedPersonnel}
                 excludeKeys={selectedManager ? [selectedManager.AccountID] : []}
             />
         </>

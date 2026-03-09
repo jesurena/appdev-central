@@ -62,6 +62,7 @@ export default function EditUserDialog({ visible, onCancel, onSave, user, isEdit
             confirmLoading={confirmLoading}
             okText={isEditing ? "Update" : "Create"}
             destroyOnHidden
+            forceRender
             centered
             width={{
                 xs: '90%',
