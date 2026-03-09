@@ -88,6 +88,7 @@ export default function NewestUsersTable() {
                 visible={isViewModalVisible}
                 onClose={() => setIsViewModalVisible(false)}
                 user={selectedUser}
+                showProfileButton
             />
         </div>
     );
