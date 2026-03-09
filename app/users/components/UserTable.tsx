@@ -264,7 +264,6 @@ export default function UserTable() {
                                 setActiveFilters(values);
                                 setPagination(prev => ({ ...prev, current: 1 }));
                             }}
-                            onReset={handleReset}
                         />
                         <Button
                             type="primary"

@@ -212,7 +212,6 @@ export default function UserSelectionModal({
                         setActiveFilters(values);
                         setPagination(prev => ({ ...prev, current: 1 }));
                     }}
-                    onReset={handleReset}
                 />
             </div>
 

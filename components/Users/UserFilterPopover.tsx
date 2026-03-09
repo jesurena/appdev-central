@@ -15,23 +15,13 @@ export interface FilterValues {
 export interface UserFilterPopoverProps {
     currentFilters: FilterValues;
     onApply: (filters: FilterValues) => void;
-    onReset: () => void;
 }
 
-export default function UserFilterPopover({ currentFilters, onApply, onReset }: UserFilterPopoverProps) {
+export default function UserFilterPopover({ currentFilters, onApply }: UserFilterPopoverProps) {
     const [filters, setFilters] = useState<FilterValues>(currentFilters);
-
-    // Sync internal state with props when currentFilters change
     useEffect(() => {
-        // Value-based check to prevent infinite loops if currentFilters is a new object but has same values
-        if (
-            filters.accountGroup !== currentFilters.accountGroup ||
-            filters.accountType !== currentFilters.accountType ||
-            filters.status !== currentFilters.status
-        ) {
-            setFilters(currentFilters);
-        }
-    }, [currentFilters, filters]);
+        setFilters(currentFilters);
+    }, [currentFilters]);
 
     const handleResetAll = () => {
         const resetValues: FilterValues = {
@@ -40,7 +30,7 @@ export default function UserFilterPopover({ currentFilters, onApply, onReset }: 
             status: null,
         };
         setFilters(resetValues);
-        onReset();
+        onApply(resetValues);
     };
 
     const handleApply = () => {
