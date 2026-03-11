@@ -88,4 +88,4 @@ If you encounter an **HTTP 429 Status code**, it means your client (browser) is 
 
 ## 🛡️ License
 
-© 2026 AppDev Central. All rights reserved.
+© 2026 AppDev Central. All rights reserved. Update
