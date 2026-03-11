@@ -94,7 +94,7 @@ export default function LoginClient() {
                 </div>
 
                 <div className="flex justify-between items-center text-[13px] text-text-info font-medium">
-                    <span>Copyright © 2025 AppDev Central</span>
+                    <span>Copyright © {new Date().getFullYear()} AppDev Central</span>
                     <Link href="#" className="hover:text-text-info transition-colors">Privacy Policy</Link>
                 </div>
             </div>
